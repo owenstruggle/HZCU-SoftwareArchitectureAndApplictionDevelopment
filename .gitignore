@@ -2,3 +2,4 @@
 .idea
 .mvn
 target/
+/Experiment03_v/node_modules/
