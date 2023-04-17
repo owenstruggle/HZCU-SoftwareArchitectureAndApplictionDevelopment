@@ -31,7 +31,7 @@ public class UserController {
         return Result.SUCCESS("获取成功", pageInfo);
     }
 
-    @PutMapping("/add")
+    @PostMapping("/add")
     public Result addUser(@RequestBody UserDAO user) {
         return userServer.addUser(user);
     }
@@ -39,5 +39,18 @@ public class UserController {
     @GetMapping("/user")
     public Result getUser(@RequestParam("id") String id) {
         return userServer.getUser(id);
+    }
+
+    @DeleteMapping("/delete")
+    public Result deleteUser(@RequestBody() HashMap<String, Object>map) {
+        if (map.containsKey("id")) {
+            return userServer.deleteUser((String) map.get("id"));
+        }
+        return Result.ERROR("id 获取失败", new HashMap<>());
+    }
+
+    @PostMapping("/update")
+    public Result updateUser(@RequestBody() UserDAO user) {
+        return userServer.updateUser(user);
     }
 }

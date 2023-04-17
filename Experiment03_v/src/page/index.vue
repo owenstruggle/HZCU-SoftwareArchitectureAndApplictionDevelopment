@@ -13,9 +13,10 @@
           <el-table-column property="gender" label="性别"></el-table-column>
           <el-table-column property="email" label="电子邮箱"></el-table-column>
           <el-table-column property="identityCard" label="身份证号"></el-table-column>
-          <el-table-column label="操作" width="125px">
+          <el-table-column label="操作" width="240px">
             <template v-slot="scope">
               <el-button size="small" type="primary" @click="handleDetails(scope.$index)" style="width: 100px">查看详情</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(scope.$index)" style="width: 100px">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -30,7 +31,7 @@
 </template>
 
 <script>
-import {getAllUser} from "@/api/getData";
+import {getAllUser, deleteUser} from "@/api/getData";
 
 export default {
   name: "index",
@@ -72,6 +73,17 @@ export default {
     },
     handleDetails(index) {
       this.$router.push({name: '用户信息', query: {id: this.tableData[index].id}})
+    },
+    async handleDelete(index) {
+      const res = await deleteUser({id: this.tableData[index].id})
+      if (res.status === 1) {
+        await this.loadUserInfo()
+      } else {
+        this.$message({
+          type: "error",
+          message: "delete error"
+        })
+      }
     },
     handleAdd() {
       this.$router.push({name: '添加用户'})

@@ -18,4 +18,8 @@ public interface UserServer {
     Result addUser(UserDAO user);
 
     Result getUser(String id);
+
+    Result deleteUser(String id);
+
+    Result updateUser (UserDAO user);
 }
