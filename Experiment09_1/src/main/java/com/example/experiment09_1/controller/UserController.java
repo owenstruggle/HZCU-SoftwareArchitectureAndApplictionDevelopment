@@ -1,0 +1,95 @@
+package com.example.experiment09_1.controller;
+
+
+import com.example.experiment09_1.entity.Result;
+import com.example.experiment09_1.entity.UserDAO;
+import com.example.experiment09_1.service.impl.UserServerImpl;
+import com.example.experiment09_1.utils.MD5Util;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * @author Owem
+ * @date 2023/3/12 14:46
+ * @description TODO
+ **/
+@RestController
+public class UserController {
+    @Resource
+    UserServerImpl userServer;
+
+    @Value("${UserParams.Admin_SALT}")
+    String Admin_SALT;
+    @Value("${UserParams.User_SALT}")
+    String User_SALT;
+
+    @Operation(summary = "获取全部用户数据")
+    @GetMapping("/allUser")
+    public Result getAllUser(@RequestParam("pageNum") @Parameter(description = "页码") int pageNum,
+                             @RequestParam("pageSize") @Parameter(description = "页大小") int pageSize,
+                             @RequestParam("token") @Parameter(description = "token") String token,
+                             @RequestParam("accountId") @Parameter(description = "账户名") String accountId) {
+        if (!MD5Util.encode(accountId, Admin_SALT).equals(token) && !MD5Util.encode(accountId, User_SALT).equals(token)) {
+            return Result.ERROR("无权限", new HashMap<>());
+        }
+
+        PageHelper.startPage(pageNum, pageSize);
+        List<UserDAO> userList = userServer.getAllUser();
+        PageInfo<UserDAO> pageInfo = new PageInfo<>(userList);
+        System.out.println(pageInfo);
+        return Result.SUCCESS("获取成功", pageInfo);
+    }
+
+    @Operation(summary = "添加用户数据")
+    @PostMapping("/add")
+    public Result addUser(@RequestBody @Parameter(description = "用户对象") UserDAO user) {
+        if (!MD5Util.encode(user.getAccountId(), Admin_SALT).equals(user.getToken())) {
+            return Result.ERROR("无权限", new HashMap<>());
+        }
+
+        return userServer.addUser(user);
+    }
+
+    @Operation(summary = "获取指定用户数据")
+    @GetMapping("/user")
+    public Result getUser(@RequestParam("id") @Parameter(description = "用户 id") String id,
+                          @RequestParam("token") @Parameter(description = "token") String token,
+                          @RequestParam("accountId") @Parameter(description = "账户名") String accountId) {
+        if (!MD5Util.encode(accountId, Admin_SALT).equals(token) && !MD5Util.encode(accountId, User_SALT).equals(token)) {
+            return Result.ERROR("无权限", new HashMap<>());
+        }
+
+        return userServer.getUser(id);
+    }
+
+    @Operation(summary = "删除指定用户数据")
+    @DeleteMapping("/delete")
+    public Result deleteUser(@RequestBody() @Parameter(description = "包含用户 id 的 map 对象") HashMap<String, Object> map) {
+        if (!MD5Util.encode((String) map.get("accountId"), Admin_SALT).equals(map.get("token"))) {
+            return Result.ERROR("无权限", new HashMap<>());
+        }
+
+        if (map.containsKey("id")) {
+            return userServer.deleteUser((String) map.get("id"));
+        }
+        return Result.ERROR("id 获取失败", new HashMap<>());
+    }
+
+    @Operation(summary = "更新用户数据")
+    @PutMapping("/update")
+    public Result updateUser(@RequestBody() @Parameter(description = "用户对象") UserDAO user) {
+        if (!MD5Util.encode(user.getAccountId(), Admin_SALT).equals(user.getToken())) {
+            return Result.ERROR("无权限", new HashMap<>());
+        }
+
+        return userServer.updateUser(user);
+    }
+}
