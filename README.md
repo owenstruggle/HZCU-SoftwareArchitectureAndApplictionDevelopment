@@ -1,2 +1,2 @@
 # SoftwareArchitectureAndApplicationDevelopment
-这是 ZUCC 软件架构有应用开发日常作业
+这是 浙大城市学院（HZCU） 软件架构与应用开发 日常作业
